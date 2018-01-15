@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web.Http;
+using ControlWorks.Services.Bartender;
 using log4net;
 using log4net.Repository.Hierarchy;
 using Microsoft.Extensions.Configuration;
@@ -34,18 +35,23 @@ namespace ControlWorks.Services.Rest
             );
 
             config.Routes.MapHttpRoute(
-                name: "ActionRoute",
-                routeTemplate: "api/{controller}/{action}/{*filename}",
+                name: "PrintApi",
+                routeTemplate: "api/{controller}/{action}/{id}",
                 defaults: new { id = RouteParameter.Optional }
             );
 
+            config.Routes.MapHttpRoute(
+                name: "ActionRoute",
+                routeTemplate: "api/{controller}/{action}/{item}",
+                defaults: new { id = RouteParameter.Optional }
+            );
 
             app.UseWebApi(config);
         }
 
         public static void Start()
         {
-            
+
             var hostUrl = $"http://*:{_port}";
             //Logger.Log(new LogEntry(LoggingEventType.Information, $"Starting WebApi at host {hostUrl}"));
             WebApp.Start<WebApiApplication>(hostUrl);

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -21,17 +22,14 @@ namespace ControlWorks.Services.Rest
             //http://localhost:9001/api/Print/GetPreview
             try
             {
-                string previewFile;
-                using (var service = new BartenderService())
-                {
-                    previewFile = service.GetPreviewImage(filename, width, height);
-                }
+                var service = BartenderService.Service;
+                var previewFile = service.GetPreviewImage(filename, width, height);
 
                 return ResponseMessage(Request.CreateErrorResponse(HttpStatusCode.NotFound, previewFile));
             }
             catch (Exception ex)
             {
-                ex.Data.Add("PviController.Operation", "GetDetails");
+                ex.Data.Add("PrintController.Operation", "GetPreview");
                 _log.Error(ex.Message, ex);
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.InternalServerError, ex.Message));
             }
@@ -39,24 +37,58 @@ namespace ControlWorks.Services.Rest
         }
 
         [HttpPost]
-        public IHttpActionResult SendPrint([FromBody] string filename)
+        public IHttpActionResult SendPrint(PrintData item)
         {
             try
             {
-                string message;
-                using (var service = new BartenderService())
-                {
-                    message = service.Print(filename);
-                }
+                var service = BartenderService.Service;
+                var message = service.Print(item);
 
-                return ResponseMessage(Request.CreateErrorResponse(HttpStatusCode.NotFound, message));
+                return ResponseMessage(Request.CreateErrorResponse(HttpStatusCode.NotFound, ""));
             }
             catch (Exception ex)
             {
-                ex.Data.Add("PviController.Operation", "GetDetails");
+                ex.Data.Add("PrintController.Operation", "SendPrint");
                 _log.Error(ex.Message, ex);
                 throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.InternalServerError, ex.Message));
             }
         }
+
+        [HttpGet]
+        public IHttpActionResult Start()
+        {
+            try
+            {
+                var service = BartenderService.Service;
+                service.Start();
+
+                return ResponseMessage(Request.CreateErrorResponse(HttpStatusCode.NotFound, "Bartender Service Started"));
+            }
+            catch (Exception ex)
+            {
+                ex.Data.Add("PrintController.Operation", "Start");
+                _log.Error(ex.Message, ex);
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.InternalServerError, ex.Message));
+            }
+        }
+
+        [HttpGet]
+        public IHttpActionResult Stop()
+        {
+            try
+            {
+                var service = BartenderService.Service;
+                service.Start();
+
+                return ResponseMessage(Request.CreateErrorResponse(HttpStatusCode.NotFound, "Bartender Service Started"));
+            }
+            catch (Exception ex)
+            {
+                ex.Data.Add("PrintController.Operation", "Stop");
+                _log.Error(ex.Message, ex);
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.InternalServerError, ex.Message));
+            }
+        }
+
     }
 }

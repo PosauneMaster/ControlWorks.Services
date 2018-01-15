@@ -12,28 +12,67 @@ namespace ControlWorks.Services.Bartender
 {
     public class BartenderService : IDisposable
     {
+        private static BartenderService _service;
+
+        public static BartenderService Service => _service ?? (_service = new BartenderService());
+
         private readonly ILog _log = LogManager.GetLogger("FileLogger");
-        private readonly Engine _engine = null; // The BarTender Print Engine.
+        private Engine _engine = null; // The BarTender Print Engine.
         private LabelFormatDocument _format = null; // The format that will be exported.
 
         public string DefaultPrinterName { get; set; }
 
-        public BartenderService()
+        private BartenderService()
         {
-            _engine = new Engine(true);
+            _engine = new Engine();
 
             var printers = new Printers();
             DefaultPrinterName = printers.Default.PrinterName;
         }
 
-        public string Print(string filename)
+        public void Start()
+        {
+            if (_engine == null)
+            {
+                _engine = new Engine();
+            }
+
+            if (!_engine.IsAlive)
+            {
+                _engine.Start();
+            }
+        }
+
+        public void Stop()
+        {
+            _engine?.Stop();
+        }
+
+        private int GetNumberOfLabels(string count)
+        {
+            if (Int32.TryParse(count, out var number))
+            {
+                return number;
+            }
+
+            return 1;
+        }
+
+        public string Print(PrintData item)
         {
             try
             {
-                _format?.Close(SaveOptions.DoNotSaveChanges);
-                _format = _engine.Documents.Open(filename);
-                _format.PrintSetup.IdenticalCopiesOfLabel = 1;
+                Start();
+
+                if (_format.FileName != item.Filename)
+                {
+                    _format?.Close(SaveOptions.DoNotSaveChanges);
+                    _format = _engine.Documents.Open(item.Filename);
+                }
+
+                _format.PrintSetup.IdenticalCopiesOfLabel = GetNumberOfLabels(item.NumberOfLables);
                 _format.PrintSetup.PrinterName = DefaultPrinterName;
+                _format.PageSetup.Orientation = GetOrientation(item.Orientation);
                 var waitForCompletionTimeout = 10000; // 10 seconds
                 var result = _format.Print("Label Print", waitForCompletionTimeout, out var messages);
 
@@ -56,37 +95,27 @@ namespace ControlWorks.Services.Bartender
             return "An Error Occurred";
         }
 
-
-        public bool Reprint()
+        private Orientation GetOrientation(string orientation)
         {
-            if (_format == null)
+            if (orientation == "1")
             {
-                return false;
+                return Orientation.Landscape;
             }
-
-            if (_engine?.Documents == null)
+            if (orientation == "2")
             {
-                return false;
+                return Orientation.Portrait;
             }
-
-            if (_engine.Documents.Count < 1)
+            if (orientation == "3")
             {
-                return false;
+                return Orientation.Landscape180;
             }
-            var waitForCompletionTimeout = 10000; // 10 seconds
-            var result = _format.Print("Label Print", waitForCompletionTimeout, out var messages);
-
-            string messageString = "\n\nMessages:";
-            foreach (Seagull.BarTender.Print.Message message in messages)
+            if (orientation == "4")
             {
-                messageString += "\n\n" + message.Text;
+                return Orientation.Portrait180;
             }
+            return Orientation.Landscape;
 
-            _log.Info(messageString);
-
-            return result == Result.Success;
         }
-
 
         public string GetPreviewImage(string filename, int width, int height)
         {
@@ -96,12 +125,12 @@ namespace ControlWorks.Services.Bartender
 
             try
             {
+                Start();
                 var files = Directory.GetFiles(previewPath);
                 foreach (string file in files)
                 {
                     File.Delete(file);
                 }
-
 
                 _format = _engine.Documents.Open(filename);
                 _format.PrintSetup.PrinterName = DefaultPrinterName;
