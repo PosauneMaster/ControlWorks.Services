@@ -44,7 +44,7 @@ namespace ControlWorks.Services.Rest
                 var service = BartenderService.Service;
                 var message = service.Print(item);
 
-                return ResponseMessage(Request.CreateErrorResponse(HttpStatusCode.NotFound, ""));
+                return ResponseMessage(Request.CreateErrorResponse(HttpStatusCode.NotFound, message));
             }
             catch (Exception ex)
             {
