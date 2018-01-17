@@ -69,7 +69,7 @@ namespace ControlWorks.Services.Bartender
                     _format?.Close(SaveOptions.DoNotSaveChanges);
                     _format = _engine.Documents.Open(item.Filename);
                 }
-
+               
                 _format.PrintSetup.IdenticalCopiesOfLabel = GetNumberOfLabels(item.NumberOfLables);
                 _format.PrintSetup.PrinterName = DefaultPrinterName;
                 _format.PageSetup.Orientation = GetOrientation(item.Orientation);

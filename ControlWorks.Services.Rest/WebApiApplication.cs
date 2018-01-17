@@ -57,5 +57,10 @@ namespace ControlWorks.Services.Rest
             WebApp.Start<WebApiApplication>(hostUrl);
 
         }
+
+        public static void Stop()
+        {
+            BartenderService.Service.Dispose();
+        }
     }
 }

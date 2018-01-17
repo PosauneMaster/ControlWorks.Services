@@ -16,6 +16,7 @@ namespace ControlWorks.Services
 
         public void Stop()
         {
+            WebApiApplication.Stop();
         }
 
     }
