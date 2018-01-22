@@ -1,15 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using log4net;
+using Seagull.BarTender.Print;
+using System;
 using System.Configuration;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using log4net;
-using Seagull.BarTender.Print;
 
+[assembly: log4net.Config.XmlConfigurator(Watch = true)]
 namespace ControlWorks.Services.Bartender
 {
+
     public class BartenderService : IDisposable
     {
         private static BartenderService _service;
@@ -28,6 +26,10 @@ namespace ControlWorks.Services.Bartender
 
             var printers = new Printers();
             DefaultPrinterName = printers.Default.PrinterName;
+
+            _log.Info("Starting Bartender Service");
+            _log.Info($"Printer name={printers.Default.PrinterName}, Model={printers.Default.PrinterModel} Driver={printers.Default.Driver.Name}, Version={printers.Default.Driver.Version}");
+
         }
 
         public void Start()
@@ -82,7 +84,7 @@ namespace ControlWorks.Services.Bartender
                     messageString += "\n\n" + message.Text;
                 }
 
-                _log.Info(messageString);
+                _log.Debug(messageString);
 
                 return messageString;
 
@@ -97,19 +99,19 @@ namespace ControlWorks.Services.Bartender
 
         private Orientation GetOrientation(string orientation)
         {
+            if (orientation == "0")
+            {
+                return Orientation.Portrait;
+            }
             if (orientation == "1")
             {
                 return Orientation.Landscape;
             }
             if (orientation == "2")
             {
-                return Orientation.Portrait;
-            }
-            if (orientation == "3")
-            {
                 return Orientation.Landscape180;
             }
-            if (orientation == "4")
+            if (orientation == "3")
             {
                 return Orientation.Portrait180;
             }

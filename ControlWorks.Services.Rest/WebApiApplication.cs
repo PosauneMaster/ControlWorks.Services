@@ -1,19 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Web.Http;
-using ControlWorks.Services.Bartender;
+﻿using ControlWorks.Services.Bartender;
 using log4net;
-using log4net.Repository.Hierarchy;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Owin.Hosting;
 using Newtonsoft.Json;
 using Owin;
+using System.Web.Http;
 
+[assembly: log4net.Config.XmlConfigurator(Watch = true)]
 namespace ControlWorks.Services.Rest
 {
+
     public class WebApiApplication
     {
         private ILog _log = LogManager.GetLogger("FileLogger");
