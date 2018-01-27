@@ -11,5 +11,6 @@ namespace ControlWorks.Services.Bartender
         public string Filename { get; set; }
         public string Orientation { get; set; }
         public string NumberOfLables { get; set; }
+        public string PrintCommand { get; set; }
     }
 }

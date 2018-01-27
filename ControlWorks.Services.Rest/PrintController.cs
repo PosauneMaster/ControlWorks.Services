@@ -36,6 +36,40 @@ namespace ControlWorks.Services.Rest
 
         }
 
+        [HttpPut]
+        public IHttpActionResult Cancel()
+        {
+            try
+            {
+                var service = BartenderService.Service;
+                service.Cancel();
+                return ResponseMessage(Request.CreateErrorResponse(HttpStatusCode.NotFound, String.Empty));
+            }
+            catch (Exception ex)
+            {
+                ex.Data.Add("PrintController.Operation", "Cancel");
+                _log.Error(ex.Message, ex);
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.InternalServerError, ex.Message));
+            }
+        }
+
+        [HttpPost]
+        public IHttpActionResult Cancel(PrintData item)
+        {
+            try
+            {
+                var service = BartenderService.Service;
+                service.Cancel(item.PrintCommand);
+                return ResponseMessage(Request.CreateErrorResponse(HttpStatusCode.NotFound, String.Empty));
+            }
+            catch (Exception ex)
+            {
+                ex.Data.Add("PrintController.Operation", "Cancel");
+                _log.Error(ex.Message, ex);
+                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.InternalServerError, ex.Message));
+            }
+        }
+
         [HttpPost]
         public IHttpActionResult SendPrint(PrintData item)
         {

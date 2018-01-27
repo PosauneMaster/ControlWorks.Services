@@ -60,6 +60,65 @@ namespace ControlWorks.Services.Bartender
             return 1;
         }
 
+        public void Cancel(string command)
+        {
+            try
+            {
+                _log.Debug($"Sending command {command}");
+                Start();
+                var printers = new Printers();
+                PrinterQueryCommand queryCommand = new PrinterQueryCommand(command);
+                printers.Default.ExecuteQuery(queryCommand);
+
+            }
+            catch (Exception e)
+            {
+                _log.Error(e.Message, e);
+            }
+        }
+
+        public void Cancel()
+        {
+            try
+            {
+                Start();
+                var printers = new Printers();
+
+                if (IsActionSupported(printers.Default.PrinterName, PrinterActionCode.CancelAllJobs))
+                {
+                    _log.Debug($"PrinterActionCode.CancelAllJobs is supported");
+                    printers.Default.ExecuteAction(PrinterActionCode.CancelAllJobs);
+                }
+                else
+                {
+                    _log.Debug($"PrinterActionCode.CancelAllJobs is not supported");
+                }
+                if (IsActionSupported(printers.Default.PrinterName, PrinterActionCode.CancelQueuedJobs))
+                {
+                    _log.Debug($"PrinterActionCode.CancelQueuedJobs is not supported");
+                    printers.Default.ExecuteAction(PrinterActionCode.CancelQueuedJobs);
+                }
+            }
+            catch (Exception e)
+            {
+                _log.Error(e.Message, e);
+            }
+        }
+
+        public bool IsActionSupported(string printerName, PrinterActionCode actionCode)
+        {
+            // Create a Printer object based on an installed printer's name.
+            Printer printer = new Printer(printerName);
+
+            // Get information about the specified action.
+            PrinterActionInfo info = printer.GetActionInfo(actionCode);
+
+            // Report whether the action is supported for the printer.
+            return info.IsSupported;
+        }
+
+
+
         public string Print(PrintData item)
         {
             try
